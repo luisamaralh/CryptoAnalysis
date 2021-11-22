@@ -27,10 +27,12 @@ public class TXTReporter extends ErrorMarkerListener{
 	 * The report of the analysis
 	 */
 	private String analysisReport;
+	private String analysisSummary;
 	/**
 	 * name of the analysis report
 	 */
-	private static final String REPORT_NAME = "CryptoAnalysis-Report.txt";
+	private static final String REPORT_NAME = "CryptoAnalysis-Report.csv";
+	private static final String SUMMARY_NAME = "CryptoAnalysis-Summary.csv";
 	
 	/**
 	 * Creates {@link TXTReporter} a constructor with reportDir and rules as parameter
@@ -50,22 +52,33 @@ public class TXTReporter extends ErrorMarkerListener{
 	@Override
 	public void afterAnalysis() {
 		this.analysisReport = ReporterHelper.generateReport(rules, objects, this.secureObjects, this.errorMarkers, this.errorMarkerCount);
+		this.analysisSummary = ReporterHelper.generateSummary(rules, objects, this.secureObjects, this.errorMarkers, this.errorMarkerCount);
 
 		try {
 			FileWriter writer = new FileWriter(outputFolder + File.separator + REPORT_NAME);
 			writer.write(this.analysisReport);
 			writer.close();
-			for (SootClass c : this.errorMarkers.rowKeySet()) {
-				FileOutputStream streamOut = new FileOutputStream(new File(outputFolder + File.separator +c.toString()+".jimple"));
-				PrintWriter writerOut = new PrintWriter(new EscapedWriter(new OutputStreamWriter(streamOut)));
-				Printer.v().printTo(c, writerOut);
-				writerOut.flush();
-				streamOut.close();
-				writerOut.close();
-			}
-			LOG.info("Text Report generated to file : "+ outputFolder.getAbsolutePath() + File.separator + REPORT_NAME);
+//			for (SootClass c : this.errorMarkers.rowKeySet()) {
+//				FileOutputStream streamOut = new FileOutputStream(new File(outputFolder + File.separator +c.toString()+".jimple"));
+//				PrintWriter writerOut = new PrintWriter(new EscapedWriter(new OutputStreamWriter(streamOut)));
+//				Printer.v().printTo(c, writerOut);
+//				writerOut.flush();
+//				streamOut.close();
+//				writerOut.close();
+//			}
+			LOG.info("CSV Report generated to file : "+ outputFolder.getAbsolutePath() + File.separator + REPORT_NAME);
 		} catch (IOException e) {
 			LOG.error("Could not write to file " + outputFolder.getAbsolutePath() + File.separator+ REPORT_NAME, e);
+		}
+
+		try {
+			FileWriter writer = new FileWriter(outputFolder + File.separator + SUMMARY_NAME);
+			writer.write(this.analysisSummary);
+			writer.close();
+
+			LOG.info("CSV Summary generated to file : "+ outputFolder.getAbsolutePath() + File.separator + SUMMARY_NAME);
+		} catch (IOException e) {
+			LOG.error("Could not write to file " + outputFolder.getAbsolutePath() + File.separator + SUMMARY_NAME, e);
 		}
 
 	}

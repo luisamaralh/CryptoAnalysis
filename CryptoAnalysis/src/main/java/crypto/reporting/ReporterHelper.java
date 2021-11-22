@@ -29,58 +29,75 @@ public class ReporterHelper{
 	 */
 	public static String generateReport(List<CrySLRule> rules, Collection<IAnalysisSeed> objects, 
 			List<IAnalysisSeed> secureObjects, Table<SootClass, SootMethod, Set<AbstractError>> errorMarkers, 
-			Map<Class, Integer> errorMarkerCount){
+			Map<Class, Integer> errorMarkerCount) {
 		String report = "";
 
-		report += "Ruleset: \n";
-		for (CrySLRule r : rules) {
-			report += String.format("\t%s\n", r.getClassName());
-		}
+//		report += "Ruleset: \n";
+//		for (CrySLRule r : rules) {
+//			report += String.format("\t%s\n", r.getClassName());
+//		}
 
-		report += "\n";
+//		report += "\n";
 
-		report += "Analyzed Objects: \n";
-		for (IAnalysisSeed r : objects) {
-			report += String.format("\tObject:\n");
-			report += String.format("\t\tVariable: %s\n", r.var().value());
-			report += String.format("\t\tType: %s\n", r.getType());
-			report += String.format("\t\tStatement: %s\n", r.stmt().getUnit().get());
-			report += String.format("\t\tMethod: %s\n", r.getMethod());
-			report += String.format("\t\tSHA-256: %s\n", r.getObjectId());
-			report += String.format("\t\tSecure: %s\n", secureObjects.contains(r));
-		}
-		
-		
-		report += "\n";
+//		report += "Analyzed Objects: \n";
+//		int i=1;
+//		for (IAnalysisSeed r : objects) {
+//			report += String.format("Object: (%s)", i);
+//			report += String.format("\tVariable: %s", r.var().value());
+//			report += String.format("\tType: %s", r.getType());
+//			report += String.format("\tStatement: %s", r.stmt().getUnit().get());
+//			report += String.format("\tMethod: %s", r.getMethod());
+//			report += String.format("\tSHA-256: %s", r.getObjectId());
+//			report += String.format("\tSecure: %s\n", secureObjects.contains(r));
+//			i++;
+//		}
+
+
+//		report += "\n";
+//		i=1;
+		report += String.format("ErrorType;Class;Method;ViolatedRule;Object;Statement\n");
 		for (SootClass c : errorMarkers.rowKeySet()) {
-			report += String.format("Findings in Java Class: %s\n", c.getName());
+//			report += String.format("Findings in Java Class: (%s)", i);
+//			report += String.format("\tClass: %s", c.getName());
 			for (Entry<SootMethod, Set<AbstractError>> e : errorMarkers.row(c).entrySet()) {
-				report += String.format("\n\t in Method: %s\n", e.getKey().getSubSignature());
+//				report += String.format("\nMethod: (%s)", j);
+//				report += String.format("\tMethod: %s", e.getKey().getSubSignature());
 				for (AbstractError marker : e.getValue()) {
-					report += String.format("\t\t%s violating CrySL rule for %s", marker.getClass().getSimpleName() ,marker.getRule().getClassName());
-					if(marker instanceof ErrorWithObjectAllocation) {
-						report += String.format(" (on Object #%s)\n", ((ErrorWithObjectAllocation) marker).getObjectLocation().getObjectId());
+					report += String.format("%s;", marker.getClass().getSimpleName());
+					report += String.format("%s;", c.getName());
+					report += String.format("%s;", e.getKey().getSubSignature());
+					report += String.format("violating CrySL rule for %s", marker.getRule().getClassName());
+					if (marker instanceof ErrorWithObjectAllocation) {
+						report += String.format(" (on Object #%s);", ((ErrorWithObjectAllocation) marker).getObjectLocation().getObjectId());
 					} else {
-						report += "\n";
+						report += " ;";
 					}
-					report += String.format("\t\t\t%s\n", marker.toErrorMarkerString());
-					report += String.format("\t\t\tat statement: %s\n\n", marker.getErrorLocation().getUnit().get());
+					report += String.format("%s;", marker.toErrorMarkerString());
+					report += String.format("%s\n", marker.getErrorLocation().getUnit().get());
 				}
 			}
-			report += "\n";
 		}
-		report += "======================= CryptoAnalysis Summary ==========================\n";
-		report += String.format("\tNumber of CrySL rules: %s\n", rules.size());
-		report += String.format("\tNumber of Objects Analyzed: %s\n", objects.size());
+		return report;
+	}
+
+	public static String generateSummary(List<CrySLRule> rules, Collection<IAnalysisSeed> objects,
+										List<IAnalysisSeed> secureObjects, Table<SootClass, SootMethod, Set<AbstractError>> errorMarkers,
+										Map<Class, Integer> errorMarkerCount) {
+		String report = "";
+		report += String.format("CrySL-Rules;Objects-Analyzed;Violations\n");
+		report += String.format("%s;", rules.size());
+		report += String.format("%s;", objects.size());
+
 		if(errorMarkers.rowKeySet().isEmpty()){
-			report += "No violation of any of the rules found.\n";
+			report += "0\n";
 		} else{
-			report += "\n\tCryptoAnalysis found the following violations. For details see description above.\n";
+			int sumErrors=0;
 			for(Entry<Class, Integer> e : errorMarkerCount.entrySet()){
-				report += String.format("\t%s: %s\n", e.getKey().getSimpleName(),e.getValue());
+				sumErrors+=e.getValue();
+//				report += String.format("%s: %s;", e.getKey().getSimpleName(),e.getValue());
 			}
+			report += String.format("%s\n", sumErrors);
 		}
-		report += "=====================================================================";
 		return report;
 	}
 	
