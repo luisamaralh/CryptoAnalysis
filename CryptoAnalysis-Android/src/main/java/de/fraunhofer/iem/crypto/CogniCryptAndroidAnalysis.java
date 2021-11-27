@@ -3,6 +3,8 @@ package de.fraunhofer.iem.crypto;
 import java.io.File;
 import java.util.Collection;
 import java.util.List;
+
+import crypto.reporting.TXTReporter;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import com.google.common.collect.Lists;
@@ -114,7 +116,7 @@ public class CogniCryptAndroidAnalysis {
 		final CrySLResultsReporter reporter = new CrySLResultsReporter();
 		CollectErrorListener errorListener = new CollectErrorListener();
 		reporter.addReportListener(errorListener);
-		reporter.addReportListener(new CommandLineReporter(outputDir, rules));
+		reporter.addReportListener(new TXTReporter(outputDir, rules));
 		CryptoScanner scanner = new CryptoScanner() {
 
 			@Override
