@@ -53,7 +53,6 @@ public class TXTReporter extends ErrorMarkerListener{
 	public void afterAnalysis() {
 		this.analysisReport = ReporterHelper.generateReport(rules, objects, this.secureObjects, this.errorMarkers, this.errorMarkerCount);
 		this.analysisSummary = ReporterHelper.generateSummary(rules, objects, this.secureObjects, this.errorMarkers, this.errorMarkerCount);
-
 		try {
 			FileWriter writer = new FileWriter(outputFolder + File.separator + REPORT_NAME);
 			writer.write(this.analysisReport);

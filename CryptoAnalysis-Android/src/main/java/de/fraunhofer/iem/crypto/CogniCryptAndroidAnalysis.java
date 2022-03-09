@@ -4,6 +4,7 @@ import java.io.File;
 import java.util.Collection;
 import java.util.List;
 
+import crypto.reporting.SARIFReporter;
 import crypto.reporting.TXTReporter;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
@@ -117,6 +118,7 @@ public class CogniCryptAndroidAnalysis {
 		CollectErrorListener errorListener = new CollectErrorListener();
 		reporter.addReportListener(errorListener);
 		reporter.addReportListener(new TXTReporter(outputDir, rules));
+		reporter.addReportListener(new SARIFReporter(outputDir, rules));
 		CryptoScanner scanner = new CryptoScanner() {
 
 			@Override
