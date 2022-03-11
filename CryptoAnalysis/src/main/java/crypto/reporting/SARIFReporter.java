@@ -23,6 +23,7 @@ import com.fasterxml.jackson.databind.ObjectWriter;
 import crypto.analysis.IAnalysisSeed;
 import crypto.analysis.errors.AbstractError;
 import crypto.rules.CrySLRule;
+import soot.Scene;
 import soot.SootClass;
 import soot.SootMethod;
 
@@ -132,14 +133,22 @@ public class SARIFReporter extends ErrorMarkerListener {
 			addFile(c);
 
 			for (Entry<SootMethod, Set<AbstractError>> e : this.errorMarkers.row(c).entrySet()) {
-				for (AbstractError marker : e.getValue()) {
-					String errorType = marker.getClass().getSimpleName();
-					String richText = String.format("%s violating CrySL rule for %s.",
-							marker.getClass().getSimpleName(), marker.getRule().getClassName());
-					String text = String.format("%s.", marker.toErrorMarkerString());
-					int lineNumber = marker.getErrorLocation().getUnit().get().getJavaSourceStartLineNumber();
-					this.addResults(errorType, c, e.getKey().getName(), lineNumber, text, richText);
+				SootMethod m = e.getKey();
+				LOGGER.info(" Size = " + Scene.v().getReachableMethods().size());
+				if(!Scene.v().getReachableMethods().contains(m)){
+					LOGGER.error("Method " + m.getName() + " is not reachable.");
+				}else{
+					LOGGER.info("Method " + m.getName() + " is  reachable.");
+					for (AbstractError marker : e.getValue()) {
+						String errorType = marker.getClass().getSimpleName();
+						String richText = String.format("%s violating CrySL rule for %s.",
+								marker.getClass().getSimpleName(), marker.getRule().getClassName());
+						String text = String.format("%s.", marker.toErrorMarkerString());
+						int lineNumber = marker.getErrorLocation().getUnit().get().getJavaSourceStartLineNumber();
+						this.addResults(errorType, c, e.getKey().getName(), lineNumber, text, richText);
+					}
 				}
+
 			}
 		}
 		JSONObject sarif = makeSARIF();
